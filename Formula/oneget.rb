@@ -1,7 +1,7 @@
 class Oneget < Formula
   desc "CLI for 1get link shortening service"
   homepage "https://github.com/FutureDevSolutions/1get-cli"
-  version "0.1.2"
+  version "0.1.3"
   license "MIT"
   on_macos do
     if Hardware::CPU.arm?
