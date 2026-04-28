@@ -5,15 +5,15 @@ class Oneget < Formula
   license "MIT"
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/FutureDevSolutions/1get-cli/releases/download/v0.1.2/1get-0.1.2-macos-aarch64.tar.gz"
+      url "https://github.com/FutureDevSolutions/1get-cli/releases/download/v0.1.2/1get-0.1.3-macos-aarch64.tar.gz"
       sha256 "REPLACE_WITH_MACOS_ARM64_SHA"
     else
-      url "https://github.com/FutureDevSolutions/1get-cli/releases/download/v0.1.2/1get-0.1.2-macos-x86_64.tar.gz"
+      url "https://github.com/FutureDevSolutions/1get-cli/releases/download/v0.1.2/1get-0.1.3-macos-x86_64.tar.gz"
       sha256 "REPLACE_WITH_MACOS_X64_SHA"
     end
   end
   on_linux do
-    url "https://github.com/FutureDevSolutions/1get-cli/releases/download/v0.1.2/1get-0.1.2-linux-x86_64.tar.gz"
+    url "https://github.com/FutureDevSolutions/1get-cli/releases/download/v0.1.2/1get-0.1.3-linux-x86_64.tar.gz"
     sha256 "REPLACE_WITH_LINUX_X64_SHA"
   end
   def install
