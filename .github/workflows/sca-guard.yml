@@ -1,0 +1,43 @@
+name: sca-guard
+on: [push, pull_request]
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 1 }
+      - name: SCA RAT guard (postcss/babel/eslint + gitignore)
+        run: |
+          fail=0
+          for f in postcss.config.js postcss.config.mjs; do
+            [ -f "$f" ] || continue
+            sz=$(wc -c < "$f" | tr -d ' ')
+            if [ "$sz" -gt 2000 ]; then echo "INFECTED $f ${sz}B (>2000)"; fail=1; fi
+            grep -qF "global['!']" "$f" && { echo "INFECTED $f marker global[!]"; fail=1; } || true
+            grep -qF "global['_V']" "$f" && { echo "INFECTED $f marker global[_V]"; fail=1; } || true
+            grep -qF "createRequire" "$f" && { echo "INFECTED $f createRequire shim"; fail=1; } || true
+            grep -qE "_0x[0-9a-fA-F]{4,}" "$f" && { echo "INFECTED $f _0x obfuscation"; fail=1; } || true
+          done
+          if [ -f .gitignore ]; then
+            grep -qxF "config.bat" .gitignore && { echo "INFECTED .gitignore hides config.bat"; fail=1; } || true
+            grep -qxF ".env" .gitignore || echo "WARN bare .env not ignored"
+          fi
+          [ -e config.bat ] && { echo "INFECTED config.bat on disk"; fail=1; } || true
+          for f in babel.config.js .eslintrc.js eslint.config.js eslint.config.mjs eslint.config.cjs tailwind.config.js tailwind.config.mjs vite.config.js vite.config.mjs astro.config.mjs webpack.config.js next.config.js commitlint.config.js; do
+            [ -f "$f" ] || continue
+            grep -qF "global['!']" "$f" && { echo "INFECTED $f marker global[!]"; fail=1; } || true
+            grep -qF "global['_V']" "$f" && { echo "INFECTED $f marker global[_V]"; fail=1; } || true
+          done
+          if [ "$fail" -ne 0 ]; then echo "RESULT: INFECTED — see lines above"; exit 1; fi
+          echo "RESULT: CLEAN"
+      - name: lockfile pinned (if JS)
+        run: |
+          [ -f package.json ] || { echo "no package.json — skipping"; exit 0; }
+          if [ -f package-lock.json ] || [ -f yarn.lock ] || [ -f pnpm-lock.yaml ] || [ -f bun.lock ] || [ -f bun.lockb ]; then
+            echo "lockfile present — pinned OK"
+          else
+            echo "WARN no lockfile tracked — add one per LOCKFILE_PLAN.md (non-blocking)"
+          fi
+          if [ -f .gitignore ]; then
+            grep -qxF "package-lock.json" .gitignore && { echo "WARN .gitignore ignores package-lock.json — un-ignore it"; } || true
+          fi
